@@ -21,6 +21,9 @@ def get_channels(img):
         return img.shape[2]
     return 1
 
+def resize_3d(img):
+    return np.expand_dims(img, 2)
+
 
 def resize(img):
     return np.expand_dims(img, 2)
@@ -80,13 +83,6 @@ def show_histograms(img_path, normalize=True, reduce=False, streched=False):
         plt.show()
 
     if streched:
-        # for x in np.nditer(img):
-        #     h[x] = h[x]+1
-        # for i, val in (enumerate(h)):
-        #     print(i, val)
-        #
-        # plt.bar(range(256), h)
-        # plt.show()
 
         min = 50
         max = 55
@@ -100,9 +96,12 @@ def show_histograms(img_path, normalize=True, reduce=False, streched=False):
         plt.show()
 
 
-def get_negative(img_path, show=True):
+def get_negative(img_path, rgb=False, show=True):
 
-    img = get_image_from_path(img_path)
+    if not rgb:
+        img = get_image_from_path(img_path)
+    else:
+        img = get_image_from_path(img_path, flags=1)
 
     img = img.astype(np.float)
     img = img*-1 + 255
@@ -115,10 +114,14 @@ def get_negative(img_path, show=True):
         cv2.waitKey(0)
     return img
 
-def get_luminance(img_path, show=True):
+def get_luminance(img_path, rgb=False, show=True):
 
-    img = get_image_from_path(img_path)
+    if not rgb:
+        img = get_image_from_path(img_path)
+    else:
+        img = get_image_from_path(img_path, 1)
     img = img.astype(np.float)
+
 
     img = img*1.5
     img[img < 0] = 0
@@ -127,7 +130,7 @@ def get_luminance(img_path, show=True):
     img = img.astype(np.uint8)
 
     if show:
-        cv2.imshow('img',img)
+        cv2.imshow('img', img)
         cv2.waitKey(0)
 
     return img
@@ -169,6 +172,38 @@ def get_blend(img1_path, img2_path, alpha,  show=True):
     # cv2.imshow('img5', img5)
     # cv2.waitKey(0)
 
+def get_contrast_stretching(img_path, new_max, new_min, show=True):
+
+    img = get_image_from_path(img_path)
+
+    channels = get_channels(img)
+
+    if img.ndim == 2:
+        img = resize(img)
+
+
+    for k in np.arange(0, channels):
+        ma = np.max(img[:, :, k])
+        mi = np.min(img[:, :, k])
+        for i in np.arange(0, img.shape[0]):
+            for j in np.arange(0, img.shape[1]):
+                pin = img[i, j, k]
+                pin = float(pin) - mi
+                pout = float(pin)*(float(new_max)-new_min)/(float(ma)-mi)
+                pout += new_min
+                if pout < 0:
+                    img[i, j, k] = 0
+                elif pout > 255:
+                    img[i, j, k] = 255
+                else:
+                    img[i, j, k] = np.uint8(pout)
+
+
+    if show:
+        cv2.imshow("streched", img)
+        cv2.waitKey(0)
+
+    return img
 
 
 def get_Otsu(img_path, show=True):
@@ -263,18 +298,21 @@ def main():
     Otsu = False
     Negative = False
     Luminance = False
-    Blend = True
+    Blend = False
+    Streched = True
 
     if histograms:
         show_histograms("lab01_img\\sunflower.jpg", reduce=True, streched=True)
     if Otsu:
         get_Otsu("lab01_img\\camera.png")
     if Negative:
-        get_negative("lab01_img\\sunflower.jpg")
+        get_negative("lab01_img\\sunflower.jpg", rgb=True)
     if Luminance:
-        get_luminance("lab01_img\\house.jpg")
+        get_luminance("lab01_img\\house.jpg", rgb=True)
     if Blend:
         get_blend("lab01_img\\background.jpg", "lab01_img\\foreground.jpg", alpha=0.5)
+    if Streched:
+        get_contrast_stretching("lab01_img\\lowcontrast.jpg", 50, 200)
 
 
 
