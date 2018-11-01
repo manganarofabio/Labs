@@ -9,7 +9,7 @@ def get_image_from_path(img_path, flags=0):
         exit(-1)
     else:
         return cv2.imread(img_path, flags=flags)
-        return cv2.imread(img_path, flags=flags)
+
 
 
 def get_kernel_ones(dim=3):
@@ -163,16 +163,16 @@ def average_filter(img_path, k_size=3, show=True):
 
 def main():
 
-    Gaussian = True
+    Gaussian = False
     Median = True
-    Average = True
+    Average = False
     Bilateral = True
 
 
     if Gaussian:
         conv_Gaussian("lab02_img\\lena_noise.png")
     if Median:
-        median_filter("lab02_img\\lena_noise.png")
+        median_filter("lab02_img\\imp_noise.jpg", )
     if Average:
         average_filter("lab02_img\\lena_noise.png")
     # if Bilateral:

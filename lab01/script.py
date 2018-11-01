@@ -13,7 +13,7 @@ def get_image_from_path(img_path, flags=0):
         exit(-1)
     else:
         return cv2.imread(img_path, flags=flags)
-        return cv2.imread(img_path, flags=flags)
+
 
 
 def get_channels(img):
