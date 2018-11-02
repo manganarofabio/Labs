@@ -58,6 +58,7 @@ def color_labels(img, num_labels):
 
 
 
+
 if __name__ == '__main__':
 
     img = cv2.imread('lab04_img/cvl_acronym.png', cv2.IMREAD_GRAYSCALE)
@@ -91,8 +92,9 @@ if __name__ == '__main__':
                     if len(queue) == 0:
                         break
                 label_idx += 1
-
+    # img = np.broadcast_to(np.expand_dims(img, 2), (img.shape[0], img.shape[1], 3))
+    # img.setflags(write=1)
     ff = color_labels(img, label_idx)
 
-    cv2.imshow('prova', ff.astype(np.uint8))
+    cv2.imshow('labeled', ff.astype(np.uint8))
     cv2.waitKey(0)
