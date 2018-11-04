@@ -452,10 +452,132 @@ def dief_ing():
 #     cv2.imshow('libro ', img)
 #
 #     cv2.waitKey(0)
+def test_mio():
 
+    img = cv2.imread('./dief.jpg', )
+    cv2.imshow('dief orig ', img)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+    cv2.imshow('canny', edges)
+
+    coords_1 = get_lines_coords(edges, 1, 180, 140, np.pi / 2, 1.8 * np.pi)
+    coords_2 = get_lines_coords(edges, 1, 180, 40, 0, np.pi / 180)
+
+    min_orizz = find_min_for_y(coords_1, 0)
+    max_orizz = find_max_for_y(coords_1, 0)
+
+    x_min = find_min(coords_2, 0)
+    x_max = find_max(coords_2, 0)
+
+    print('warp coords')
+    lh = f_lines_intersection(min_orizz[0], min_orizz[1], x_min)
+    print(lh)
+
+    ll = f_lines_intersection(max_orizz[0], max_orizz[1], x_min)
+    print(ll)
+
+    rh = f_lines_intersection(min_orizz[0], min_orizz[1], x_max)
+    print(rh)
+
+    rl = f_lines_intersection(max_orizz[0], max_orizz[1], x_max)
+    print(rl)
+
+    dst_dim = (380, 200)
+    h, status = cv2.findHomography(np.array([[lh[0], lh[1]], [ll[0], ll[1]], [rh[0], rh[1]], [rl[0], rl[1]]]),
+                                   np.array([[0, 0], [0, dst_dim[1]], [dst_dim[0], 0], [dst_dim[0], dst_dim[1]]]))
+
+    im_dst = cv2.warpPerspective(img, h, dst_dim)
+    cv2.imshow('dief warpato ', im_dst)
+    cv2.imwrite('dief_warped.jpg', im_dst)
+
+    # parte 2
+
+    gray = cv2.cvtColor(im_dst, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray, 80, 150, apertureSize=3)
+
+    coords_1 = get_lines_coords(edges, 1, 90, 110, np.pi / 2 - 0.1, np.pi / 2 + 0.1)
+
+    edges = cv2.Canny(gray, 120, 180, apertureSize=3)
+    coords_2 = get_lines_coords(edges, 1, 180, 70, 0, np.pi / 180)
+
+    edges = cv2.Canny(gray, 50, 120, apertureSize=3)
+    coords_3 = get_lines_coords(edges, 2, 180, 70, 0, np.pi / 180)
+
+    x_max = find_max(coords_3, 0)
+    x_middle_1 = find_max(coords_2, 0)
+    x_middle_2 = find_min(coords_2, 0)
+    x_middle_3 = x_middle_2 / 3
+    x_min = 0
+
+    y_max = find_max(coords_1, 1)
+    y_min = find_min(coords_1[1:], 1)
+    y_middle = (y_max + y_min) / 2
+
+    print(x_max, x_middle_1, x_middle_2, x_middle_3, x_min)
+    print(y_max, y_middle, y_min)
+
+    print('meccaninca')
+    mlh = (x_middle_3, y_min)
+    print(mlh)
+    mll = (x_middle_3, y_middle)
+    print(mll)
+    mrh = (x_max, y_min)
+    print(mrh)
+    mrl = (x_max, y_middle)
+    print(mrl)
+
+    print('civile')
+    clh = (x_middle_1, y_middle)
+    print(clh)
+    cll = (x_middle_1, y_max)
+    print(cll)
+    crh = (x_max, y_middle)
+    print(crh)
+    crl = (x_max, y_max)
+    print(crl)
+
+
+    inf_points = [(0,41), (0, 92), (94, 92), (94, 41)]
+
+    civ = cv2.imread('./CIV.png', cv2.IMREAD_COLOR)
+
+    h, status = cv2.findHomography(
+        np.array([[0, 0], [civ.shape[1], 0], [0, civ.shape[0]], [civ.shape[1], civ.shape[0]]]),
+        np.array([[clh[0], clh[1] + 2], [crh[0], crh[1] + 2], [cll[0], cll[1] + 2], [crl[0], crl[1] + 2]]))
+
+    im_dst_civ = cv2.warpPerspective(civ, h, dst_dim)
+
+    im_dst[im_dst_civ[:, :] != [0, 0, 0]] = im_dst_civ[im_dst_civ[:, :] != [0, 0, 0]]
+
+    mec = cv2.imread('./MEC.png', cv2.IMREAD_COLOR)
+
+    h, status = cv2.findHomography(
+        np.array([[0, 0], [0, mec.shape[0]], [mec.shape[1], 0], [mec.shape[1], mec.shape[0]]]),
+        np.array([[mlh[0], mlh[1] - 2], [mll[0], mll[1] - 2], [mrh[0], mrh[1] - 2], [mrl[0], mrl[1] - 2]]))
+
+    im_dst_mec = cv2.warpPerspective(mec, h, dst_dim)
+
+    im_dst[im_dst_mec[:, :] != [0, 0, 0]] = im_dst_mec[im_dst_mec[:, :] != [0, 0, 0]]
+
+    inf = cv2.imread('./INF.png', cv2.IMREAD_COLOR)
+
+    h, status = cv2.findHomography(
+        np.array([[0, 0], [inf.shape[1], 0], [0, inf.shape[0]], [inf.shape[1], inf.shape[0]]]),
+        np.array([[0, 41], [94, 41], [0, 92], [94, 92]])
+    )
+
+    im_dst_inf = cv2.warpPerspective(inf, h, dst_dim)
+    im_dst[im_dst_inf[:, :] != [0, 0, 0]] = im_dst_inf[im_dst_inf[:, :] != [0, 0, 0]]
+    cv2.imshow('finale', im_dst)
+
+    cv2.waitKey(0)
 
 if __name__ == '__main__':
-    dief_ing()
+
+    #dief_ing()
     #a_caso()
     #main('image.jpg', 'ciao')
     #prova()
+
+    #
+    test_mio()

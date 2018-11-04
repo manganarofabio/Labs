@@ -84,8 +84,8 @@ def hough_lines(img_path, p=True):
 
 def main():
 
-    Stiching = False
-    Hough = True
+    Stiching = True
+    Hough = False
 
     if Stiching:
         stiching()
