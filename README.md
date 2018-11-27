@@ -4,6 +4,7 @@ Computer Vision Labs - Unimore 2017/2018
 ## Lab01:
   * Histograms
   * Linear operators (negative, luminance, blending)
+  * Otsu
 
 ## Lab02:
   * Filterining (average, median, gaussian)
